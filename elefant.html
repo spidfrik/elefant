@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="description" content="Елефант Работилница">
+  <title>Елефант - Систем за Сечење</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@300;400;600;700;900&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0f17;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    
+    .font-tech {
+      font-family: 'Chakra Petch', sans-serif;
+    }
+
+    .neon-border-orange {
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.4), inset 0 0 15px rgba(249, 115, 22, 0.2);
+      border: 2px solid #f97316;
+    }
+    
+    .neon-border-cyan {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+      border: 2px solid #06b6d4;
+    }
+
+    .neon-text-orange {
+      text-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
+    }
+
+    .neon-text-cyan {
+      text-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+
+    .active-glow {
+      animation: pulse-subtle 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none">
+
+  <!-- Header Navigation -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-50 px-4 py-3">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-orange-600 text-black p-2 rounded-lg font-black text-xl font-tech">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white font-tech uppercase">
+            Работилница <span class="text-orange-500">Елефант</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Bar -->
+      <div class="hidden lg:flex items-center space-x-6 bg-slate-950/60 px-5 py-2 rounded-xl border border-slate-800 text-sm">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-square-check text-emerald-400"></i>
+          <span class="text-slate-400">Завршени:</span>
+          <span id="stat-completed" class="font-bold text-white font-tech text-base">0</span>
+        </div>
+        <div class="h-4 w-px bg-slate-800"></div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-ruler-combined text-cyan-400"></i>
+          <span class="text-slate-400">Должни метри:</span>
+          <span id="stat-meters" class="font-bold text-cyan-400 font-tech text-base">0.0 m</span>
+        </div>
+        <div class="h-4 w-px bg-slate-800"></div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-layer-group text-orange-400"></i>
+          <span class="text-slate-400">Површина:</span>
+          <span id="stat-sqm" class="font-bold text-orange-400 font-tech text-base">0.00 m²</span>
+        </div>
+        <div class="h-4 w-px bg-slate-800"></div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-clock text-amber-400"></i>
+          <span class="text-slate-400">На чекање:</span>
+          <span id="stat-pending" class="font-bold text-amber-400 font-tech text-base">0</span>
+        </div>
+      </div>
+
+      <!-- Action Controls -->
+      <div class="flex items-center space-x-2">
+        <button id="pwa-install-btn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-lg text-sm transition flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> <span class="hidden md:inline">Инсталирај Апликација</span>
+        </button>
+        <button onclick="toggleAudio()" id="audio-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg text-sm font-semibold transition border border-slate-700">
+          <i class="fa-solid fa-volume-high text-orange-400"></i> <span class="hidden sm:inline">Звук</span>
+        </button>
+        <button onclick="toggleFullscreen()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg text-sm font-semibold transition border border-slate-700">
+          <i class="fa-solid fa-expand text-cyan-400"></i> <span class="hidden sm:inline">Цел Екран</span>
+        </button>
+        <button onclick="toggleTVMode()" id="tv-mode-btn" class="bg-orange-600 hover:bg-orange-500 text-black font-bold px-3 py-2 rounded-lg text-sm transition font-tech">
+          <i class="fa-solid fa-tv"></i> TV Режим
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-[1920px] mx-auto p-4 md:p-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Active Job Section -->
+    <section id="active-job-container" class="lg:col-span-7 flex flex-col justify-between bg-slate-900 border-2 border-orange-500/80 rounded-2xl p-6 md:p-8 neon-border-orange active-glow relative overflow-hidden">
+      <div class="absolute top-0 right-0 bg-orange-500 text-black font-black text-xs md:text-sm px-4 py-1.5 rounded-bl-xl uppercase tracking-wider font-tech">
+        <i class="fa-solid fa-play animate-pulse mr-1"></i> Активна Позиција за Сечење
+      </div>
+
+      <div id="active-job-content" class="space-y-6 my-auto">
+        <!-- Content dynamically injected via JavaScript -->
+      </div>
+
+      <!-- Action Buttons for Active Job -->
+      <div id="active-actions" class="mt-8 pt-6 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <button onclick="completeActiveJob()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg py-4 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/40 uppercase font-tech">
+          <i class="fa-solid fa-circle-check text-xl"></i> Заврши и Следен
+        </button>
+        <button onclick="pauseActiveJob()" class="bg-amber-600 hover:bg-amber-500 text-black font-bold text-lg py-4 px-6 rounded-xl transition flex items-center justify-center gap-2 uppercase font-tech">
+          <i class="fa-solid fa-pause text-xl"></i> Паузирај
+        </button>
+        <button onclick="skipActiveJob()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-lg py-4 px-6 rounded-xl transition flex items-center justify-center gap-2 uppercase font-tech border border-slate-700">
+          <i class="fa-solid fa-forward text-xl"></i> Прескокни
+        </button>
+      </div>
+    </section>
+
+    <!-- Queue & Job Entry Section -->
+    <section class="lg:col-span-5 flex flex-col space-y-6">
+
+      <!-- Add New Cut Job Form -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white font-tech uppercase flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle text-orange-500"></i> Нов Налог за Сечење
+          </h2>
+          <button onclick="loadDemoData()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+            <i class="fa-solid fa-database"></i> Демо Податоци
+          </button>
+        </div>
+
+        <form id="add-job-form" onsubmit="handleAddJob(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Вид на Мермер / Гранит</label>
+              <input type="text" id="marble-type" required placeholder="пр. Прилепски Сивец" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Клиент / Проект</label>
+              <input type="text" id="client-name" required placeholder="пр. Објект Аеродром" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-orange-500">
+            </div>
+          </div>
+
+          <!-- Dimensions L x W x T -->
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Должина (cm)</label>
+              <input type="number" step="0.1" id="dim-length" required placeholder="120" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-tech focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Ширина (cm)</label>
+              <input type="number" step="0.1" id="dim-width" required placeholder="60" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-tech focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Дебелина (cm)</label>
+              <input type="number" step="0.1" id="dim-thick" required placeholder="3" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-tech focus:outline-none focus:border-orange-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Количина (парчиња)</label>
+              <input type="number" id="job-qty" min="1" value="1" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white font-tech focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Обработка на Кант</label>
+              <select id="edge-profile" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500">
+                <option value="Рамен кант (Polished Straight)">Рамен Кант</option>
+                <option value="Полукружен (Half Bullnose)">Полукружен (Half Bullnose)</option>
+                <option value="Полн Круг (Full Bullnose)">Полн Круг (Full Bullnose)</option>
+                <option value="Фазета (Bevel)">Фазета (Bevel)</option>
+                <option value="Без Обработка (Raw Cut)">Без Обработка</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Забелешка / Специјални Барања</label>
+            <input type="text" id="special-notes" placeholder="пр. Сечење под агол 45°, полирање со висок сјај" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-orange-500">
+          </div>
+
+          <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-black font-bold py-2.5 rounded-lg transition font-tech uppercase tracking-wider flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i> Додај во Редослед
+          </button>
+        </form>
+      </div>
+
+      <!-- Queue List & Controls -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex-1 flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 class="text-lg font-bold text-white font-tech uppercase flex items-center gap-2">
+            <i class="fa-solid fa-list-ol text-cyan-400"></i> Редослед на Сечење
+          </h2>
+
+          <!-- Filters -->
+          <div class="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+            <button onclick="setFilter('all')" id="filter-all" class="px-2.5 py-1 rounded font-semibold text-white bg-slate-800">Сите</button>
+            <button onclick="setFilter('pending')" id="filter-pending" class="px-2.5 py-1 rounded font-semibold text-slate-400 hover:text-white">Чекаат</button>
+            <button onclick="setFilter('completed')" id="filter-completed" class="px-2.5 py-1 rounded font-semibold text-slate-400 hover:text-white">Завршени</button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-3">
+          <div class="relative">
+            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-500 text-xs"></i>
+            <input type="text" id="search-input" oninput="renderQueue()" placeholder="Пребарај по материјал или клиент..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="queue-list" class="space-y-2.5 overflow-y-auto max-h-[380px] custom-scrollbar pr-1 flex-1">
+          <!-- Queue items generated via JS -->
+        </div>
+
+        <!-- Reset / Data Controls -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+          <button onclick="exportData()" class="hover:text-cyan-400 transition"><i class="fa-solid fa-download"></i> Извоз JSON</button>
+          <button onclick="importData()" class="hover:text-cyan-400 transition"><i class="fa-solid fa-upload"></i> Увоз JSON</button>
+          <button onclick="resetData()" class="hover:text-red-400 transition"><i class="fa-solid fa-trash"></i> Ресетирај Систем</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-800/80 py-3 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div>&copy; 2026 Елефант</div>
+      <div id="clock-display" class="font-tech text-slate-400 text-sm">--:--:--</div>
+    </div>
+  </footer>
+
+  <script>
+    // App State Management
+    let jobs = JSON.parse(localStorage.getItem('marble_jobs')) || [];
+    let activeFilter = 'all';
+    let audioEnabled = true;
+    let tvModeActive = false;
+
+    // Web Audio API Sound Effects Synthesizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'complete') {
+        // Success Chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3); // C6
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'alert') {
+        // Action Alert
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now); // A4
+        osc.frequency.setValueAtTime(880, now + 0.1); // A5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audio-btn');
+      if (audioEnabled) {
+        btn.innerHTML = `<i class="fa-solid fa-volume-high text-orange-400"></i> <span class="hidden sm:inline">Звук</span>`;
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-slate-500"></i> <span class="hidden sm:inline">Без Звук</span>`;
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function toggleTVMode() {
+      tvModeActive = !tvModeActive;
+      const btn = document.getElementById('tv-mode-btn');
+      const container = document.getElementById('active-job-container');
+
+      if (tvModeActive) {
+        btn.classList.replace('bg-orange-600', 'bg-cyan-500');
+        btn.innerHTML = `<i class="fa-solid fa-tv"></i> Стандарден Режим`;
+        container.classList.add('scale-[1.02]', 'z-20');
+        document.body.classList.add('text-lg');
+      } else {
+        btn.classList.replace('bg-cyan-500', 'bg-orange-600');
+        btn.innerHTML = `<i class="fa-solid fa-tv"></i> TV Режим`;
+        container.classList.remove('scale-[1.02]', 'z-20');
+        document.body.classList.remove('text-lg');
+      }
+    }
+
+    // Save Data
+    function saveData() {
+      localStorage.setItem('marble_jobs', JSON.stringify(jobs));
+      renderApp();
+    }
+
+    // Handle Adding New Job
+    function handleAddJob(e) {
+      e.preventDefault();
+      const newJob = {
+        id: Date.now(),
+        marbleType: document.getElementById('marble-type').value,
+        client: document.getElementById('client-name').value,
+        length: parseFloat(document.getElementById('dim-length').value),
+        width: parseFloat(document.getElementById('dim-width').value),
+        thick: parseFloat(document.getElementById('dim-thick').value),
+        qty: parseInt(document.getElementById('job-qty').value),
+        edgeProfile: document.getElementById('edge-profile').value,
+        notes: document.getElementById('special-notes').value || 'Нема дополнителни забелешки',
+        status: jobs.length === 0 ? 'in-progress' : 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      jobs.push(newJob);
+      saveData();
+      playSound('alert');
+
+      document.getElementById('add-job-form').reset();
+    }
+
+    // Complete Active Job
+    function completeActiveJob() {
+      const activeIdx = jobs.findIndex(j => j.status === 'in-progress');
+      if (activeIdx !== -1) {
+        jobs[activeIdx].status = 'completed';
+        
+        // Pick next pending job
+        const nextPending = jobs.find(j => j.status === 'pending');
+        if (nextPending) {
+          nextPending.status = 'in-progress';
+        }
+        
+        playSound('complete');
+        saveData();
+      }
+    }
+
+    function pauseActiveJob() {
+      const activeJob = jobs.find(j => j.status === 'in-progress');
+      if (activeJob) {
+        activeJob.status = 'paused';
+        playSound('alert');
+        saveData();
+      }
+    }
+
+    function skipActiveJob() {
+      const activeIdx = jobs.findIndex(j => j.status === 'in-progress');
+      if (activeIdx !== -1) {
+        const activeJob = jobs[activeIdx];
+        activeJob.status = 'pending';
+        
+        // Push active job to end of list
+        jobs.splice(activeIdx, 1);
+        jobs.push(activeJob);
+
+        // Set top pending as active
+        const nextPending = jobs.find(j => j.status === 'pending');
+        if (nextPending) nextPending.status = 'in-progress';
+
+        playSound('alert');
+        saveData();
+      }
+    }
+
+    function setJobStatus(id, newStatus) {
+      const job = jobs.find(j => j.id === id);
+      if (job) {
+        job.status = newStatus;
+        saveData();
+      }
+    }
+
+    function deleteJob(id) {
+      jobs = jobs.filter(j => j.id !== id);
+      saveData();
+    }
+
+    function moveJobUp(id) {
+      const idx = jobs.findIndex(j => j.id === id);
+      if (idx > 0) {
+        const temp = jobs[idx];
+        jobs[idx] = jobs[idx - 1];
+        jobs[idx - 1] = temp;
+        saveData();
+      }
+    }
+
+    function moveJobDown(id) {
+      const idx = jobs.findIndex(j => j.id === id);
+      if (idx !== -1 && idx < jobs.length - 1) {
+        const temp = jobs[idx];
+        jobs[idx] = jobs[idx + 1];
+        jobs[idx + 1] = temp;
+        saveData();
+      }
+    }
+
+    // Filter Switcher
+    function setFilter(filter) {
+      activeFilter = filter;
+      ['all', 'pending', 'completed'].forEach(f => {
+        const btn = document.getElementById(`filter-${f}`);
+        if (f === filter) {
+          btn.className = "px-2.5 py-1 rounded font-semibold text-white bg-slate-800";
+        } else {
+          btn.className = "px-2.5 py-1 rounded font-semibold text-slate-400 hover:text-white";
+        }
+      });
+      renderQueue();
+    }
+
+    // Load Initial Demo Data
+    function loadDemoData() {
+      jobs = [
+        {
+          id: 1,
+          marbleType: "Прилепски Сивец (Prilep White)",
+          client: "Вила Охрид - Скали",
+          length: 140,
+          width: 35,
+          thick: 3,
+          qty: 12,
+          edgeProfile: "Полукружен (Half Bullnose)",
+          notes: "Преден кант полиран, странични со фазета 2mm.",
+          status: "in-progress",
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          marbleType: "Беласица Гранит Црн",
+          client: "Ресторан Скопје - Шанк",
+          length: 220,
+          width: 70,
+          thick: 4,
+          qty: 2,
+          edgeProfile: "Рамен кант (Polished Straight)",
+          notes: "Прецизно сечење со водено ладење, без пукнатини.",
+          status: "pending",
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 3,
+          marbleType: "Мермер Карaра Бјанко",
+          client: "Паркет & Камен ДООEL",
+          length: 60,
+          width: 60,
+          thick: 2,
+          qty: 45,
+          edgeProfile: "Без Обработка (Raw Cut)",
+          notes: "Стандардни плочки за под.",
+          status: "pending",
+          createdAt: new Date().toISOString()
+        }
+      ];
+      saveData();
+    }
+
+    function resetData() {
+      if (confirm('Дали сте сигурни дека сакате да ги избришете сите налози?')) {
+        jobs = [];
+        saveData();
+      }
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jobs, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `elefant_sechenje_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = event => {
+          try {
+            jobs = JSON.parse(event.target.result);
+            saveData();
+          } catch (err) {
+            alert('Грешка при читање на фајлот!');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    // Calculation Helpers
+    function calculateMetrics() {
+      let completedCount = 0;
+      let totalMeters = 0;
+      let totalSqm = 0;
+      let pendingCount = 0;
+
+      jobs.forEach(job => {
+        if (job.status === 'completed') {
+          completedCount += job.qty;
+          const perimeterPerPieceM = (2 * (job.length + job.width)) / 100;
+          totalMeters += perimeterPerPieceM * job.qty;
+          const sqmPerPiece = (job.length * job.width) / 10000;
+          totalSqm += sqmPerPiece * job.qty;
+        } else if (job.status === 'pending' || job.status === 'in-progress') {
+          pendingCount += job.qty;
+        }
+      });
+
+      document.getElementById('stat-completed').innerText = completedCount;
+      document.getElementById('stat-meters').innerText = totalMeters.toFixed(1) + ' m';
+      document.getElementById('stat-sqm').innerText = totalSqm.toFixed(2) + ' m²';
+      document.getElementById('stat-pending').innerText = pendingCount;
+    }
+
+    // Render Active Job Card
+    function renderActiveJob() {
+      const activeJob = jobs.find(j => j.status === 'in-progress' || j.status === 'paused');
+      const container = document.getElementById('active-job-content');
+
+      if (!activeJob) {
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <i class="fa-solid fa-circle-check text-6xl text-slate-700 mb-4"></i>
+            <h3 class="text-2xl font-bold text-slate-400 font-tech">НЕМА АКТИВНО СЕЧЕЊЕ</h3>
+            <p class="text-sm text-slate-500 mt-2">Додајте нов налог или изберете позиција од редоследот подолу.</p>
+          </div>
+        `;
+        document.getElementById('active-actions').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('active-actions').style.display = 'grid';
+
+      const sqmTotal = ((activeJob.length * activeJob.width) / 10000) * activeJob.qty;
+
+      container.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-xs uppercase tracking-widest text-orange-400 font-semibold font-tech">Клиент / Налог: ${activeJob.client}</span>
+            <h2 class="text-3xl md:text-5xl font-black text-white font-tech tracking-wide mt-1 neon-text-orange">
+              ${activeJob.marbleType}
+            </h2>
+          </div>
+          <div class="bg-orange-950/80 border border-orange-500/50 px-4 py-2 rounded-xl text-right">
+            <div class="text-xs text-orange-300 uppercase font-semibold">Статус</div>
+            <div class="text-lg font-bold ${activeJob.status === 'paused' ? 'text-amber-400' : 'text-emerald-400'} font-tech uppercase">
+              ${activeJob.status === 'paused' ? 'Паузирано' : 'Се Сече На Машина'}
+            </div>
+          </div>
+        </div>
+
+        <!-- Big Dimension Banner -->
+        <div class="bg-slate-950/90 rounded-2xl p-6 border border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div class="border-r border-slate-800/80 pr-2">
+            <div class="text-xs text-slate-400 font-semibold uppercase">Должина (L)</div>
+            <div class="text-3xl md:text-5xl font-black text-white font-tech mt-1">${activeJob.length} <span class="text-sm text-slate-500">cm</span></div>
+          </div>
+          <div class="border-r border-slate-800/80 pr-2">
+            <div class="text-xs text-slate-400 font-semibold uppercase">Ширина (W)</div>
+            <div class="text-3xl md:text-5xl font-black text-white font-tech mt-1">${activeJob.width} <span class="text-sm text-slate-500">cm</span></div>
+          </div>
+          <div class="border-r border-slate-800/80 pr-2">
+            <div class="text-xs text-slate-400 font-semibold uppercase">Дебелина (T)</div>
+            <div class="text-3xl md:text-5xl font-black text-cyan-400 font-tech mt-1">${activeJob.thick} <span class="text-sm text-slate-500">cm</span></div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase">Количина</div>
+            <div class="text-3xl md:text-5xl font-black text-orange-400 font-tech mt-1">${activeJob.qty} <span class="text-sm text-slate-500">пар.</span></div>
+          </div>
+        </div>
+
+        <!-- Edge Profile & Notes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 uppercase font-bold mb-1"><i class="fa-solid fa-shapes text-cyan-400"></i> Обработка на Кант</div>
+            <div class="text-lg font-bold text-cyan-300 font-tech">${activeJob.edgeProfile}</div>
+          </div>
+          <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 uppercase font-bold mb-1"><i class="fa-solid fa-calculator text-orange-400"></i> Вкупна Површина</div>
+            <div class="text-lg font-bold text-orange-300 font-tech">${sqmTotal.toFixed(2)} m²</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+          <div class="text-xs text-slate-400 uppercase font-bold mb-1"><i class="fa-solid fa-clipboard-list text-amber-400"></i> Специјални Забелешки</div>
+          <div class="text-base text-slate-200 font-medium">${activeJob.notes}</div>
+        </div>
+      `;
+    }
+
+    // Render Queue List
+    function renderQueue() {
+      const container = document.getElementById('queue-list');
+      const searchQuery = document.getElementById('search-input').value.toLowerCase();
+
+      let filtered = jobs.filter(job => {
+        if (activeFilter === 'pending') return job.status === 'pending' || job.status === 'in-progress' || job.status === 'paused';
+        if (activeFilter === 'completed') return job.status === 'completed';
+        return true;
+      });
+
+      if (searchQuery) {
+        filtered = filtered.filter(j => 
+          j.marbleType.toLowerCase().includes(searchQuery) || 
+          j.client.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Нема пронајдено налози.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map((job, index) => {
+        let statusBadge = '';
+        if (job.status === 'in-progress') {
+          statusBadge = `<span class="bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-bold px-2 py-0.5 rounded font-tech uppercase">АКТИВНО</span>`;
+        } else if (job.status === 'completed') {
+          statusBadge = `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded font-tech uppercase">ЗАВРШЕНО</span>`;
+        } else {
+          statusBadge = `<span class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded font-tech uppercase">НА ЧЕКАЊЕ</span>`;
+        }
+
+        return `
+          <div class="bg-slate-950/70 hover:bg-slate-950 p-3 rounded-xl border ${job.status === 'in-progress' ? 'border-orange-500/60' : 'border-slate-800'} flex items-center justify-between gap-3 transition">
+            <div class="flex items-center space-x-3 flex-1 min-w-0">
+              <div class="text-slate-500 font-tech font-bold text-xs w-5 text-center">${index + 1}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                  <h4 class="text-sm font-bold text-white truncate font-tech">${job.marbleType}</h4>
+                  ${statusBadge}
+                </div>
+                <div class="text-xs text-slate-400 truncate">
+                  ${job.client} &bull; <span class="text-cyan-400 font-tech">${job.length}×${job.width}×${job.thick} cm</span> &bull; <span class="text-orange-400 font-tech">${job.qty} пар.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center space-x-1">
+              ${job.status !== 'in-progress' ? `
+                <button onclick="setJobStatus(${job.id}, 'in-progress')" title="Постави како Активно" class="p-1.5 text-slate-400 hover:text-orange-400 rounded transition">
+                  <i class="fa-solid fa-play"></i>
+                </button>
+              ` : ''}
+              <button onclick="moveJobUp(${job.id})" title="Помести Нагоре" class="p-1.5 text-slate-400 hover:text-cyan-400 rounded transition">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button onclick="moveJobDown(${job.id})" title="Помести Надолу" class="p-1.5 text-slate-400 hover:text-cyan-400 rounded transition">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button onclick="deleteJob(${job.id})" title="Избриши" class="p-1.5 text-slate-400 hover:text-red-400 rounded transition">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderApp() {
+      calculateMetrics();
+      renderActiveJob();
+      renderQueue();
+    }
+
+    // Live Clock Update
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock-display').innerText = now.toLocaleTimeString('mk-MK');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Register Service Worker dynamically using Blob for single-file PWA setup
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE_NAME = 'elefant-v1';
+        self.addEventListener('install', e => {
+          e.waitUntil(self.skipWaiting());
+        });
+        self.addEventListener('activate', e => {
+          e.waitUntil(self.clients.claim());
+        });
+        self.addEventListener('fetch', e => {
+          e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Reg Error:', err));
+    }
+
+    // PWA Install Prompt Listener
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('pwa-install-btn');
+      if (installBtn) {
+        installBtn.classList.remove('hidden');
+        installBtn.addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              installBtn.classList.add('hidden');
+            }
+            deferredPrompt = null;
+          });
+        });
+      }
+    });
+
+    // Initial Load
+    renderApp();
+  </script>
+</body>
+</html>
